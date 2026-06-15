@@ -1,0 +1,3 @@
+# Weighted Round Robin uses the Nginx smooth weighted algorithm
+
+Weighted Round Robin uses the smooth weighted algorithm from Nginx rather than slot expansion (repeating each backend N times in a flat slice). Slot expansion is the naive implementation and produces bursty sequences (e.g. `A A A B B B C C`) where all of one backend's weight is exhausted before moving on. The smooth algorithm instead tracks a per-backend current weight, each round selecting the highest and subtracting the total weight from it, producing interleaved sequences (e.g. `A A B A C A B A B C`) that spread load evenly at every point in the sequence — not just in aggregate. This matters for backends with high weights during low-traffic periods where only a handful of requests are in flight.

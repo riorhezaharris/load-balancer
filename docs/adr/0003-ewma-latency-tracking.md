@@ -1,0 +1,3 @@
+# Least Response Time tracks latency with EWMA
+
+Latency per backend is tracked using an Exponentially Weighted Moving Average (α=0.1) rather than a simple cumulative average or a sliding window of recent samples. A simple average never forgets — a single slow request from minutes ago permanently drags the score down. A sliding window is accurate but requires a ring buffer per backend and O(N) memory. EWMA uses a single int64 per backend (nanoseconds as fixed-point to avoid atomic float64), weights recent samples more heavily, and naturally decays stale measurements. It is the standard approach used by production load balancers (HAProxy, Envoy). α=0.1 is the default but is configurable at startup.
