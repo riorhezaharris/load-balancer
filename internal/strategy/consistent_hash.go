@@ -3,6 +3,7 @@ package strategy
 import (
 	"fmt"
 	"hash/fnv"
+	"net"
 	"net/http"
 	"sort"
 	"sync"
@@ -86,6 +87,10 @@ func clientKey(r *http.Request) string {
 	ip := r.Header.Get("X-Forwarded-For")
 	if ip == "" {
 		ip = r.RemoteAddr
+	}
+	// Strip port — ephemeral port changes per connection and would break affinity.
+	if host, _, err := net.SplitHostPort(ip); err == nil {
+		return host
 	}
 	return ip
 }

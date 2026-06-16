@@ -74,6 +74,7 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	duration := time.Since(start)
 	b.ActiveConns.Add(-1)
+	b.UpdateLatency(duration.Nanoseconds())
 	s.OnRequestComplete(b, duration)
 }
 
