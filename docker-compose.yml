@@ -1,0 +1,45 @@
+services:
+  backend1:
+    build:
+      context: ./docker/mock-backend
+    environment:
+      BACKEND_NAME: backend1
+      BASE_DELAY_MS: "10"
+    networks:
+      - lb-net
+
+  backend2:
+    build:
+      context: ./docker/mock-backend
+    environment:
+      BACKEND_NAME: backend2
+      BASE_DELAY_MS: "50"
+    networks:
+      - lb-net
+
+  backend3:
+    build:
+      context: ./docker/mock-backend
+    environment:
+      BACKEND_NAME: backend3
+      BASE_DELAY_MS: "20"
+    networks:
+      - lb-net
+
+  load-balancer:
+    build:
+      context: .
+    command: ["./load-balancer", "-strategy", "round_robin"]
+    ports:
+      - "8080:8080"
+      - "9090:9090"
+    depends_on:
+      - backend1
+      - backend2
+      - backend3
+    networks:
+      - lb-net
+
+networks:
+  lb-net:
+    driver: bridge
