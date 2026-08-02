@@ -24,6 +24,12 @@ func (p *Proxy) SwapStrategy(s strategy.Strategy) {
 	p.strategy = s
 }
 
+func (p *Proxy) CurrentStrategy() strategy.Strategy {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+	return p.strategy
+}
+
 func (p *Proxy) CurrentStrategyName() string {
 	p.mu.RLock()
 	defer p.mu.RUnlock()

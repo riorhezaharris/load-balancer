@@ -49,15 +49,12 @@ func main() {
 	p := proxy.New(initialStrategy)
 	adminHandler := admin.New(p, backends, factory)
 
-	// Health checker notifies the consistent hash ring on status changes.
-	var consistentHashStrategy *strategy.ConsistentHash
-	if ch, ok := initialStrategy.(*strategy.ConsistentHash); ok {
-		consistentHashStrategy = ch
-	}
-
+	// Health checker rebuilds the ring on whichever consistent-hash instance
+	// is currently live, so a runtime hot-swap into consistent_hash still
+	// gets its ring rebuilt on health changes (not just the boot strategy).
 	checker := health.NewChecker(backends, *healthInterval, *healthTimeout, func(b *backend.Backend, _ bool) {
-		if consistentHashStrategy != nil {
-			consistentHashStrategy.RebuildRing()
+		if ch, ok := p.CurrentStrategy().(*strategy.ConsistentHash); ok {
+			ch.RebuildRing()
 		}
 	})
 
